@@ -135,13 +135,20 @@ while True:
                 cv2.rectangle(frame, (startX, startY), (endX, endY),
                               (255, 0, 0), 2)
 
+    now_time = time.time()
+    elapsed = now_time - prev_time
+    prev_time = now_time
+    elapsed = 0.000001 if elapsed == 0.0 else elapsed
+    fps = 1.0 / elapsed
+
     # draw the sending device name on the frame
     cv2.putText(frame, rpiName, (10, 25),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     # draw the object count on the frame
-    label = ", ".join("{}: {}".format(obj, count) for (obj, count) in
+    label = ", ".join(f"{obj}: {count}" for (obj, count) in
                       objCount.items())
+    label += f" FPS: {fps:.1f}"
     cv2.putText(frame, label, (10, h - 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
@@ -153,7 +160,7 @@ while True:
 
     # display the montage(s) on the screen
     for (i, montage) in enumerate(montages):
-        cv2.imshow("Car parking monitor ({})".format(i),
+        cv2.imshow(f"Car parking monitor ({i})",
                    montage)
 
     # detect any kepresses
@@ -167,7 +174,7 @@ while True:
             # remove the RPi from the last active and frame
             # dictionaries if the device hasn't been active recently
             if (datetime.now() - ts).seconds > ACTIVE_CHECK_SECONDS:
-                print("[INFO] lost connection to {}".format(rpiName))
+                print(f"[INFO] lost connection to {rpiName}")
                 lastActive.pop(rpiName)
                 frameDict.pop(rpiName)
 
